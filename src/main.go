@@ -87,6 +87,7 @@ func main() {
 	*/
 
 	// part 4: saving our assembler OR coder's revenge
+
 	filename := "data/BS_2GG.fasta.txt"
 	reads := CollectReadsFromFASTA(filename)
 	fmt.Println("We have", len(reads), "total reads.")
@@ -99,13 +100,167 @@ func main() {
 	PrintStatistics(reads)
 
 	fmt.Println("Calling assembler.")
-	minMatchLength := 800
+	minMatchLength := 30
 	indexLength := 15
-	k := 7
+	k := 20
 	errorRate := 0.11
-	contigs := GenomeAssembler4(reads, minMatchLength, indexLength, errorRate, k)
-	PrintStatistics(contigs)
-	fmt.Println("Finally, we write contigs to file.")
-	outFilename := "assembly_contigs.fasta"
-	WriteContigsToFile(contigs, outFilename)
+	//contigs := GenomeAssembler4(reads, minMatchLength, indexLength, errorRate, k)
+	//fmt.Println(len(contigs))
+	//PrintStatistics(contigs)
+	//fmt.Println("Finally, we write contigs to file.")
+	//outFilename := "assembly_contigs.fasta"
+	//WriteContigsToFile(contigs, outFilename)
+	//var graph Graph
+	//start1 := time.Now()
+	var graph Graph2
+	graph = CreateReadNetwork3Index(reads, minMatchLength, indexLength, k, errorRate)
+	//graph = GetTestGraph52()
+	fmt.Println("network created")
+	//graph.PrintGraph()
+	pointerToGraph := &graph
+	//start := time.Now()
+	pointerToGraph.FindConnectedComponents()
+	pointerToGraph.PruneConnectedComps()
+	//elapsed := time.Since(start)
+	//elapsed1 := time.Since(start1)
+	//graph.PrintGraph()
+	//fmt.Println("DFS took:", elapsed)
+	//fmt.Println("Edges took:", elapsed1)
+	//graph.PrintGraph2()
+
+	//fmt.Println("Making read network")
+	//CreateReadNetwork(reads, minMatchLength, k, indexLength, errorRate)
+	//var graph Graph
+	//graph.PrintGraph()
+	//graph = GenomeAssemblerKaushik4(reads, 200, 7, .11, 15) // GetTestGraph5()
+	//graph.PrintGraph()
+	//pointerToGraph := &graph
+	//pointerToGraph.FindConnectedComponents()
+	//pointerToGraph.PruneConnectedComps()
+	//graph.PrintGraph()
+
+	//CreateReadNetwork(reads, 300)
+}
+
+func GetTestGraph() Graph {
+	testGraph := MakeGraph()
+	testGraph.addNode(0, "A")
+	testGraph.addNode(1, "B")
+	testGraph.addNode(2, "C")
+	testGraph.addNode(3, "D")
+	testGraph.addNode(4, "E")
+	testGraph.addNode(5, "F")
+	testGraph.addNode(6, "G")
+	testGraph.addEdge(0, 1)
+	return testGraph
+}
+
+func GetTestGraph1() Graph2 {
+	testGraph := MakeGraph2()
+	testGraph.addNode2(0, "A")
+	return testGraph
+}
+
+func GetTestGraph22() Graph2 {
+	testGraph := MakeGraph2()
+	testGraph.addNode2(0, "A")
+	testGraph.addNode2(1, "B")
+	testGraph.addEdge2(0, 1, "Over")
+	return testGraph
+}
+
+func GetTestGraph2() Graph {
+	testGraph := MakeGraph()
+	testGraph.addNode(0, "A")
+	testGraph.addNode(1, "B")
+	testGraph.addNode(2, "C")
+	testGraph.addNode(3, "D")
+	testGraph.addNode(4, "E")
+	testGraph.addNode(5, "F")
+	testGraph.addNode(6, "G")
+	testGraph.addEdge(0, 1)
+	testGraph.addEdge(2, 5)
+	testGraph.addEdge(1, 2)
+	return testGraph
+}
+
+func GetTestGraph3() Graph {
+	testGraph := MakeGraph()
+	testGraph.addNode(0, "A")
+	testGraph.addNode(1, "B")
+	testGraph.addNode(2, "C")
+	testGraph.addNode(3, "D")
+	testGraph.addNode(4, "E")
+	testGraph.addNode(5, "F")
+	testGraph.addNode(6, "G")
+	testGraph.addEdge(0, 1)
+	testGraph.addEdge(2, 1)
+	//testGraph.addEdge(1, 2)
+	return testGraph
+}
+
+func GetTestGraph4() Graph {
+	testGraph := MakeGraph()
+	testGraph.addNode(0, "A")
+	testGraph.addNode(1, "B")
+	testGraph.addNode(2, "C")
+	testGraph.addNode(3, "D")
+	testGraph.addNode(4, "E")
+	testGraph.addNode(5, "F")
+	testGraph.addNode(6, "G")
+	testGraph.addEdge(0, 1)
+	testGraph.addEdge(2, 0)
+	testGraph.addEdge(1, 2)
+	return testGraph
+}
+
+func GetTestGraph5() Graph {
+	testGraph := MakeGraph()
+	testGraph.addNode(0, "A")
+	testGraph.addNode(1, "B")
+	testGraph.addNode(2, "C")
+	testGraph.addNode(3, "D")
+	testGraph.addNode(4, "E")
+	testGraph.addNode(5, "F")
+	testGraph.addNode(6, "G")
+	testGraph.addEdge(0, 1)
+	testGraph.addEdge(2, 0)
+	testGraph.addEdge(1, 2)
+	testGraph.addEdge(5, 6)
+	testGraph.addEdge(4, 5)
+	return testGraph
+}
+
+func GetTestGraph32() Graph2 {
+	testGraph := MakeGraph2()
+	for i := 0; i < 4999; i++ {
+		testGraph.addNode2(i, "A")
+	}
+	for i := 0; i < 4998; i++ {
+		testGraph.addEdge2(i, i+1, "Over")
+	}
+	testGraph.addEdge2(4999, 0, "Over")
+	return testGraph
+}
+
+func GetTestGraph42() Graph2 {
+	testGraph := MakeGraph2()
+	for i := 0; i < 5000; i++ {
+		testGraph.addNode2(i, "A")
+	}
+	return testGraph
+}
+
+func GetTestGraph52() Graph2 {
+	testGraph := MakeGraph2()
+	testGraph.addNode2(0, "A")
+	testGraph.addNode2(1, "B")
+	testGraph.addNode2(2, "C")
+	testGraph.addNode2(3, "D")
+	testGraph.addNode2(4, "E")
+	testGraph.addEdge2(0, 1, "Over")
+	testGraph.addEdge2(2, 1, "Over")
+	testGraph.addEdge2(1, 3, "Over")
+	testGraph.addEdge2(3, 2, "Over")
+	return testGraph
 }

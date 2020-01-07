@@ -27,6 +27,18 @@ func CountSharedKmers(str1, str2 string, k int) int {
 	return count
 }
 
+func CountSharedKmersMod(freqMap1 map[string]int, str2 string, k int) int {
+	count := 0
+
+	freqMap2 := FrequencyMap(str2, k)
+
+	for pattern := range freqMap1 {
+		// just take the minimum
+		count += Min2(freqMap1[pattern], freqMap2[pattern])
+	}
+	return count
+}
+
 func Min2(a, b int) int {
 	if a < b {
 		return a

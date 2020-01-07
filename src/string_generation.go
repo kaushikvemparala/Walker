@@ -99,6 +99,7 @@ func Equals(kmers1, kmers2 []string) bool {
 	for i, str := range kmers1 {
 		// look for a match
 		if Contains(str, kmers2) {
+
 		}
 	}
 }
