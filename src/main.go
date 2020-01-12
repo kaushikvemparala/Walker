@@ -121,6 +121,7 @@ func main() {
 	//start := time.Now()
 	pointerToGraph.FindConnectedComponents()
 	pointerToGraph.PruneConnectedComps()
+	Graph2Statistics(graph)
 	//elapsed := time.Since(start)
 	//elapsed1 := time.Since(start1)
 	//graph.PrintGraph()

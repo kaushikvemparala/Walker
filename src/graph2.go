@@ -272,3 +272,21 @@ func (graph *Graph2) PruneConnectedComps() {
 	}
 	fmt.Println("number of connencted components:", len(graph.connectedComponents))
 }
+
+func Graph2Statistics(graph Graph2) {
+	totalNodes := make([]int, 0)
+	for _, con := range graph.connectedComponents {
+		numNodes := 0
+		for i := 0; i < len(con); i++ {
+			numNodes++
+		}
+		totalNodes = append(totalNodes, numNodes)
+	}
+	fmt.Println("total connected comps:", len(totalNodes))
+	tot := 0
+	for _, lens := range totalNodes {
+		tot += lens
+	}
+	avgLen := tot / (len(totalNodes))
+	fmt.Println("avg connected comp size:", avgLen)
+}
