@@ -2,6 +2,7 @@ package main
 
 import (
 	"math/rand"
+	//"fmt"
 )
 
 func ExpectedSharedkmers(stringLength int, errorRate float64, k int) int {
@@ -22,7 +23,11 @@ func CountSharedKmers(str1, str2 string, k int) int {
 
 	for pattern := range freqMap1 {
 		// just take the minimum
+		//countbefore := count
 		count += Min2(freqMap1[pattern], freqMap2[pattern])
+		//if count > countbefore {
+		//			fmt.Println(pattern)
+		//}
 	}
 	return count
 }

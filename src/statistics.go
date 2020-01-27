@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func AverageStringLength(patterns []string) float64 {
 	numStrings := len(patterns)
@@ -35,11 +38,15 @@ func MaximumStringLength(patterns []string) int {
 	return m
 }
 
-func PrintStatistics(patterns []string) {
-	fmt.Println("Minimum length:", MinimumStringLength(patterns))
-	fmt.Println("Maximum length:", MaximumStringLength(patterns))
-	fmt.Println("Total length:", TotalStringLength(patterns))
-	fmt.Println("Average length:", AverageStringLength(patterns))
+func PrintStatistics(patterns []string, summaryFile *os.File) {
+	fmt.Fprintln(summaryFile, "\t\tShortest read:", MinimumStringLength(patterns))
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tLongest Read:", MaximumStringLength(patterns))
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tTotal length:", TotalStringLength(patterns))
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tAverage read length:", AverageStringLength(patterns))
+	fmt.Fprintln(summaryFile, "")
 }
 
 func DiscardShortReads(patterns []string, minReadLength int) []string {

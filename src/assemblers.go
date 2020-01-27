@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -2155,7 +2156,7 @@ func CreateReadNetwork2Index(reads []string, minMatchLength, k, indexLength int,
 	return network
 }
 
-func CreateReadNetwork3Index(reads []string, minMatchLength, k, indexLength int, errorRate float64) Graph2 {
+func CreateReadNetwork3Index(reads []string, minMatchLength, k, indexLength int, errorRate float64, logFile *os.File, summaryFile *os.File) Graph2 {
 
 	nodeTimes := make([]float64, 0)
 
@@ -2163,28 +2164,37 @@ func CreateReadNetwork3Index(reads []string, minMatchLength, k, indexLength int,
 	pointerToNetwork := &network
 
 	for i, read := range reads {
-		fmt.Println("Adding read number", i+1)
+		fmt.Fprintln(logFile, "Adding read number", i+1)
 		pointerToNetwork.addNode2(i, read)
 	}
 
 	pointertoNodes := &(network.Nodes)
 
-	fmt.Println("Building prefixIndex")
-	prefixIndex := BuildPrefixIndex3(pointertoNodes, minMatchLength, k, errorRate)
-	fmt.Println("prefixIndex built!")
-	fmt.Println("Building suffixIndex")
-	suffixIndex := BuildSuffixIndex3(pointertoNodes, minMatchLength, k, errorRate)
-	fmt.Println("suffixIndex built!")
+	fmt.Fprintln(summaryFile, "\t\tBuilding prefixIndex")
+	fmt.Fprintln(summaryFile, "")
+	prefixIndex := BuildPrefixIndex3(pointertoNodes, minMatchLength, k, errorRate, logFile)
+	fmt.Fprintln(summaryFile, "\t\tprefixIndex built!")
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tBuilding suffixIndex")
+	fmt.Fprintln(summaryFile, "")
+	suffixIndex := BuildSuffixIndex3(pointertoNodes, minMatchLength, k, errorRate, logFile)
+	fmt.Fprintln(summaryFile, "\t\tsuffixIndex built!")
+	fmt.Fprintln(summaryFile, "")
 
-	fmt.Println("length of prefixIndex:", len(prefixIndex))
-	fmt.Println("length of suffixIndex:", len(suffixIndex))
+	fmt.Fprintln(summaryFile, "\t\tlength of prefixIndex:", len(prefixIndex))
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tlength of suffixIndex:", len(suffixIndex))
+	fmt.Fprintln(summaryFile, "")
 
 	//expectedShared := float64(ExpectedSharedkmers(minMatchLength, errorRate, k))
+
+	fmt.Fprintln(summaryFile, "\t\tBuilding edges")
+	fmt.Fprintln(summaryFile, "")
 
 	for i := 0; i < len(network.Nodes); i++ {
 		node := network.Nodes[i]
 		start := time.Now()
-		fmt.Println("entering the for loop of the", node.getID2(), "th node")
+		fmt.Fprintln(logFile, "entering the", node.getID2()+1, "th loop out of", len(network.Nodes))
 		//fmt.Println("prefKey:", node.prefkey)
 		//list := prefixIndex[node.getprefkey()]
 		//fmt.Println(len(list))
@@ -2192,52 +2202,67 @@ func CreateReadNetwork3Index(reads []string, minMatchLength, k, indexLength int,
 		prefix := node.read[:minMatchLength]
 		suffix := node.read[n-minMatchLength:]
 		for key := range prefixIndex {
-			if float64(CountSharedKmers(key, suffix, k)) >= 0.7*float64(ExpectedSharedkmers(len(key), errorRate, k)) {
+			//if node.read[:indexLength] == key[minMatchLength-indexLength:] {
+			if float64(CountSharedKmers(key, suffix, k)) >= 0.9*float64(ExpectedSharedkmers(minMatchLength, errorRate, k)) {
 				for _, id2 := range prefixIndex[key] {
-					//build an edge from node to the id2
-					//pointerToNode := network.Nodes[id2]
-					network.addEdge2(id2, node.getID2(), node.getsuffkey())
-					//fmt.Println("outnode before:", len(node.outnodes))
-					//(&node).addOutNode(network.Nodes[id2])
-					//fmt.Println("outnode after:", len(node.outnodes))
-					//fmt.Println("innode before:", len(pointerToNode.innodes))
-					//(&pointerToNode).addInNode(node)
-					//fmt.Println("innode after:", len(pointerToNode.innodes))
-					fmt.Println("Edge built!!!!")
+					if id2 != node.getID2() {
+						//build an edge from node to the id2
+						//pointerToNode := network.Nodes[id2]
+						network.addEdge2(id2, node.getID2(), node.getsuffkey())
+						//fmt.Println("outnode before:", len(node.outnodes))
+						//(&node).addOutNode(network.Nodes[id2])
+						//fmt.Println("outnode after:", len(node.outnodes))
+						//fmt.Println("innode before:", len(pointerToNode.innodes))
+						//(&pointerToNode).addInNode(node)
+						//fmt.Println("innode after:", len(pointerToNode.innodes))
+						//fmt.Println("Edge built!!!!")
+					}
 				}
 			}
-			break
+			//break
+			//}
 		}
 
 		for key := range suffixIndex {
-			if float64(CountSharedKmers(key, prefix, k)) >= 0.7*float64(ExpectedSharedkmers(len(key), errorRate, k)) {
+			//if node.read[:indexLength] == key[minMatchLength-indexLength:] {
+			if float64(CountSharedKmers(key, prefix, k)) >= 0.9*float64(ExpectedSharedkmers(minMatchLength, errorRate, k)) {
 				for _, id2 := range suffixIndex[node.prefkey] {
-					//pointerToNode := network.Nodes[id2]
-					network.addEdge2(id2, node.getID2(), node.getsuffkey())
-					//fmt.Println("innode before:", len(node.innodes))
-					//(&node).addInNode(network.Nodes[id2])
-					//fmt.Println("innode after:", len(node.innodes))
-					//fmt.Println("outnode before:", len(pointerToNode.outnodes))
-					//(&pointerToNode).addOutNode(node)
-					//fmt.Println("outnode after:", len(pointerToNode.outnodes))
-					fmt.Println("Edge built!!!!")
+					if id2 != node.getID2() {
+						//pointerToNode := network.Nodes[id2]
+						network.addEdge2(id2, node.getID2(), node.getsuffkey())
+						//fmt.Println("innode before:", len(node.innodes))
+						//(&node).addInNode(network.Nodes[id2])
+						//fmt.Println("innode after:", len(node.innodes))
+						//fmt.Println("outnode before:", len(pointerToNode.outnodes))
+						//(&pointerToNode).addOutNode(node)
+						//fmt.Println("outnode after:", len(pointerToNode.outnodes))
+						//fmt.Println("Edge built!!!!")
+					}
 				}
 			}
-			break
+			//break
+			//}
 		}
 
-		fmt.Println("outnodes:", len(node.outnodes))
-		fmt.Println("innodes:", len(node.innodes))
+		//fmt.Println("outnodes:", len(node.outnodes))
+		//fmt.Println("innodes:", len(node.innodes))
 
-		elapsed := time.Since(start).Minutes()
+		elapsed := time.Since(start).Seconds()
 		nodeTimes = append(nodeTimes, elapsed)
 		network.Nodes[i] = node
+
 	}
 	totTime := 0.0
 	for _, times := range nodeTimes {
 		totTime += times
 	}
-	fmt.Println("average time per node:", totTime/(float64(len(nodeTimes))))
+	fmt.Fprintln(summaryFile, "\t\ttotal edges:", len(network.Edges))
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\ttotal edge building time:", totTime, "seconds")
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\taverage edge building time time per node:", totTime/(float64(len(nodeTimes))), "seconds")
+	fmt.Fprintln(summaryFile, "")
 	//network.PrintGraph2()
+	//fmt.Println(len(network.Edges))
 	return network
 }

@@ -3,11 +3,26 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 )
 
 func main() {
-	fmt.Println("Assembling genomes (or trying at least)!")
+	summaryFileName := "summary.txt"
+	summaryFile, err1 := os.Create(summaryFileName)
+	if err1 != nil {
+		panic("Sorry, couldn't create file!")
+	}
+	logFileName := "log1.txt"
+	logFile, err := os.Create(logFileName)
+	if err != nil {
+		panic("Sorry, couldn't create file!")
+	}
+
+	fmt.Fprintln(summaryFile, "\t************************************")
+	fmt.Fprintln(summaryFile, "\t******** Assembling genomes ********")
+	fmt.Fprintln(summaryFile, "\t************************************")
+	fmt.Fprintln(summaryFile, "")
 
 	/*
 		// part 1: initial assembler with perfect conditions
@@ -88,21 +103,28 @@ func main() {
 
 	// part 4: saving our assembler OR coder's revenge
 
+	/*
 	filename := "data/BS_2GG.fasta.txt"
+	fmt.Fprintln(summaryFile, "\tLoading reads...")
+	fmt.Fprintln(summaryFile, "")
 	reads := CollectReadsFromFASTA(filename)
-	fmt.Println("We have", len(reads), "total reads.")
-	PrintStatistics(reads)
+	fmt.Fprintln(summaryFile, "\t\tLoaded", len(reads), "total reads.")
+	fmt.Fprintln(summaryFile, "")
+	PrintStatistics(reads, summaryFile)
 
 	minReadLength := 1000
-	fmt.Println("Let's throw out short reads of length <", minReadLength)
+	fmt.Fprintln(summaryFile, "\t\tLet's throw out short reads of length <", minReadLength)
+	fmt.Fprintln(summaryFile, "")
 	reads = DiscardShortReads(reads, minReadLength)
-	fmt.Println("Updated read stats.")
-	PrintStatistics(reads)
+	fmt.Fprintln(summaryFile, "\t\tUpdated read stats.")
+	fmt.Fprintln(summaryFile, "")
+	PrintStatistics(reads, summaryFile)
 
-	fmt.Println("Calling assembler.")
-	minMatchLength := 30
+	fmt.Fprintln(summaryFile, "\tCalling assembler...")
+	fmt.Fprintln(summaryFile, "")
+	minMatchLength := 300
 	indexLength := 15
-	k := 20
+	k := 15
 	errorRate := 0.11
 	//contigs := GenomeAssembler4(reads, minMatchLength, indexLength, errorRate, k)
 	//fmt.Println(len(contigs))
@@ -112,16 +134,37 @@ func main() {
 	//WriteContigsToFile(contigs, outFilename)
 	//var graph Graph
 	//start1 := time.Now()
+	numOfReads := 5000
+	fmt.Fprintln(summaryFile, "\t\tRunning assembly on", numOfReads, "reads.")
+	fmt.Fprintln(summaryFile, "")
 	var graph Graph2
-	graph = CreateReadNetwork3Index(reads, minMatchLength, indexLength, k, errorRate)
+	graph = CreateReadNetwork3Index(reads[:numOfReads], minMatchLength, k, indexLength, errorRate, logFile, summaryFile)
 	//graph = GetTestGraph52()
-	fmt.Println("network created")
+	//fmt.Println("network created")
 	//graph.PrintGraph()
 	pointerToGraph := &graph
 	//start := time.Now()
-	pointerToGraph.FindConnectedComponents()
-	pointerToGraph.PruneConnectedComps()
-	Graph2Statistics(graph)
+	pointerToGraph.FindConnectedComponents(logFile, summaryFile)
+	pointerToGraph.PruneConnectedComps(logFile, summaryFile)
+	fmt.Fprintln(summaryFile, "\tAssembly summary")
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tminMatchLength:", minMatchLength)
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tkmer length:", k)
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tindexLength:", indexLength)
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\terrorRate:", errorRate)
+	fmt.Fprintln(summaryFile, "")
+	Graph2Statistics(graph, summaryFile)
+	*/
+
+	//fmt.Println("read:", reads[0])
+	//fmt.Println()
+	//fmt.Println()
+	//fmt.Println()
+	//fmt.Println()
+	//fmt.Println("read:", reads[1])
 	//elapsed := time.Since(start)
 	//elapsed1 := time.Since(start1)
 	//graph.PrintGraph()
@@ -141,6 +184,28 @@ func main() {
 	//graph.PrintGraph()
 
 	//CreateReadNetwork(reads, 300)
+
+	//stringone := GenerateRandomGenome(5)
+	//fmt.Println("string one:", stringone)
+	//stringtwo := GenerateRandomGenome(5)
+	//fmt.Println("string two:", stringtwo)
+	//sharedKmers := CountSharedKmers(stringone, stringtwo, 3)
+	//fmt.Println("shared kmers:", sharedKmers)
+
+
+	testGraph := GetTestGraph52()
+	pointerToGraph := &testGraph
+	pointerToGraph.FindConnectedComponents(logFile, summaryFile)
+	pointerToGraph.PruneConnectedComps(logFile, summaryFile)
+	testGraph.LNBPfinder(logFile)
+	Graph2Statistics(testGraph, summaryFile)
+	for i, conn := range testGraph.connectedComponents {
+		fmt.Print("cc ", i+1,":	[")
+		for _, node := range conn {
+			fmt.Print(" ",node.id," ")
+		}
+		fmt.Println("]")
+	}
 }
 
 func GetTestGraph() Graph {
@@ -263,5 +328,23 @@ func GetTestGraph52() Graph2 {
 	testGraph.addEdge2(2, 1, "Over")
 	testGraph.addEdge2(1, 3, "Over")
 	testGraph.addEdge2(3, 2, "Over")
+	return testGraph
+}
+
+func GetTestGraph62() Graph2 {
+	testGraph := MakeGraph2()
+	testGraph.addNode2(0, "A")
+	testGraph.addNode2(1, "B")
+	testGraph.addNode2(2, "C")
+	testGraph.addNode2(3, "D")
+	testGraph.addNode2(4, "E")
+	testGraph.addNode2(5, "E")
+	testGraph.addNode2(6, "E")
+	testGraph.addEdge2(0, 1, "Over")
+	testGraph.addEdge2(0, 2, "Over")
+	testGraph.addEdge2(0, 3, "Over")
+	testGraph.addEdge2(2, 5, "Over")
+	testGraph.addEdge2(1, 4, "Over")
+	testGraph.addEdge2(3, 6, "Over")
 	return testGraph
 }

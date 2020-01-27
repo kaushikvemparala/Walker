@@ -24,6 +24,9 @@ func CollectReadsFromFASTA(filename string) []string {
 
 	// go for as long as the reader bot can still see text
 	for scanner.Scan() {
+		if counter == 10000 {
+			break
+		}
 		currentLine := scanner.Text() // grabs one line of text and returns a strings
 		if currentLine[0] != '>' {
 			// append the current line to our growing read

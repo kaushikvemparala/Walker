@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt";
+	"os"
+)
 
 //BuildPrefixIndex takes a collection of strings (of arbitrary length bigger than prefix length)
 //and a prefix length.
@@ -104,11 +107,11 @@ func BuildSuffixIndex2(reads []string, suffixLength int) map[string]([]int) {
 	return index
 }
 
-func BuildPrefixIndex3(nodes *map[int]Node2, prefixLength, k int, errorRate float64) map[string]([]int) {
+func BuildPrefixIndex3(nodes *map[int]Node2, prefixLength, k int, errorRate float64, logFile *os.File) map[string]([]int) {
 
 	index := make(map[string]([]int))
 
-	//expectedShared := float64(ExpectedSharedkmers(prefixLength, errorRate, k))
+	expectedShared := float64(ExpectedSharedkmers(prefixLength, errorRate, k))
 
 	//populate our index
 	for id := range *nodes {
@@ -121,31 +124,34 @@ func BuildPrefixIndex3(nodes *map[int]Node2, prefixLength, k int, errorRate floa
 
 		if len(index) > 0 {
 			for key := range index {
-				if float64(CountSharedKmers(key, prefix, k)) >= 0.7*float64(ExpectedSharedkmers(len(prefix), errorRate, k)) {
+				if float64(CountSharedKmers(key, prefix, k)) >= 0.9 * expectedShared {
 					index[key] = append(index[key], id)
 					//node.setprefkey(key)
 					//(*nodes)[id] = node
 					//fmt.Println(len(index[key]))
+					//fmt.Println("found some matches")
 					break
 				} else { // we haven't seen this prefix before, create new list of occurrences
 					index[prefix] = make([]int, 1)
 					index[prefix][0] = id
+					//fmt.Println("made a new entry")
 				}
 			}
 		} else { // we haven't seen this prefix before, create new list of occurrences
 			index[prefix] = make([]int, 1)
 			index[prefix][0] = id
+			//fmt.Println("made a new entry")
 		}
-		//fmt.Println("length of prefixIndex index:", len(index))
+		fmt.Fprintln(logFile, len(index))
 	}
-	fmt.Println("length of prefixIndex index:", len(index))
+	fmt.Fprintln(logFile, "length of prefixIndex index:", len(index))
 	return index
 }
 
-func BuildSuffixIndex3(nodes *map[int]Node2, suffixLength, k int, errorRate float64) map[string]([]int) {
+func BuildSuffixIndex3(nodes *map[int]Node2, suffixLength, k int, errorRate float64, logFile *os.File) map[string]([]int) {
 	index := make(map[string]([]int))
 
-	//expectedShared := float64(ExpectedSharedkmers(suffixLength, errorRate, k))
+	expectedShared := float64(ExpectedSharedkmers(suffixLength, errorRate, k))
 
 	//populate our index
 	for id := range *nodes {
@@ -159,7 +165,7 @@ func BuildSuffixIndex3(nodes *map[int]Node2, suffixLength, k int, errorRate floa
 
 		if len(index) > 0 {
 			for key := range index {
-				if float64(CountSharedKmers(key, suffix, k)) >= 0.7*float64(ExpectedSharedkmers(len(suffix), errorRate, k)) {
+				if float64(CountSharedKmers(key, suffix, k)) >= 0.9 * expectedShared {
 					index[key] = append(index[key], id)
 					//node.setsuffkey(key)
 					//(*nodes)[id] = node
@@ -174,8 +180,8 @@ func BuildSuffixIndex3(nodes *map[int]Node2, suffixLength, k int, errorRate floa
 			index[suffix] = make([]int, 1)
 			index[suffix][0] = id
 		}
-		//fmt.Println("length of suffix index:", len(index))
+		fmt.Fprintln(logFile, len(index))
 	}
-	fmt.Println("length of suffix index:", len(index))
+	fmt.Fprintln(logFile, "length of suffix index:", len(index))
 	return index
 }
