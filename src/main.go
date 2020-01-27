@@ -104,59 +104,59 @@ func main() {
 	// part 4: saving our assembler OR coder's revenge
 
 	/*
-	filename := "data/BS_2GG.fasta.txt"
-	fmt.Fprintln(summaryFile, "\tLoading reads...")
-	fmt.Fprintln(summaryFile, "")
-	reads := CollectReadsFromFASTA(filename)
-	fmt.Fprintln(summaryFile, "\t\tLoaded", len(reads), "total reads.")
-	fmt.Fprintln(summaryFile, "")
-	PrintStatistics(reads, summaryFile)
+		filename := "data/BS_2GG.fasta.txt"
+		fmt.Fprintln(summaryFile, "\tLoading reads...")
+		fmt.Fprintln(summaryFile, "")
+		reads := CollectReadsFromFASTA(filename)
+		fmt.Fprintln(summaryFile, "\t\tLoaded", len(reads), "total reads.")
+		fmt.Fprintln(summaryFile, "")
+		PrintStatistics(reads, summaryFile)
 
-	minReadLength := 1000
-	fmt.Fprintln(summaryFile, "\t\tLet's throw out short reads of length <", minReadLength)
-	fmt.Fprintln(summaryFile, "")
-	reads = DiscardShortReads(reads, minReadLength)
-	fmt.Fprintln(summaryFile, "\t\tUpdated read stats.")
-	fmt.Fprintln(summaryFile, "")
-	PrintStatistics(reads, summaryFile)
+		minReadLength := 1000
+		fmt.Fprintln(summaryFile, "\t\tLet's throw out short reads of length <", minReadLength)
+		fmt.Fprintln(summaryFile, "")
+		reads = DiscardShortReads(reads, minReadLength)
+		fmt.Fprintln(summaryFile, "\t\tUpdated read stats.")
+		fmt.Fprintln(summaryFile, "")
+		PrintStatistics(reads, summaryFile)
 
-	fmt.Fprintln(summaryFile, "\tCalling assembler...")
-	fmt.Fprintln(summaryFile, "")
-	minMatchLength := 300
-	indexLength := 15
-	k := 15
-	errorRate := 0.11
-	//contigs := GenomeAssembler4(reads, minMatchLength, indexLength, errorRate, k)
-	//fmt.Println(len(contigs))
-	//PrintStatistics(contigs)
-	//fmt.Println("Finally, we write contigs to file.")
-	//outFilename := "assembly_contigs.fasta"
-	//WriteContigsToFile(contigs, outFilename)
-	//var graph Graph
-	//start1 := time.Now()
-	numOfReads := 5000
-	fmt.Fprintln(summaryFile, "\t\tRunning assembly on", numOfReads, "reads.")
-	fmt.Fprintln(summaryFile, "")
-	var graph Graph2
-	graph = CreateReadNetwork3Index(reads[:numOfReads], minMatchLength, k, indexLength, errorRate, logFile, summaryFile)
-	//graph = GetTestGraph52()
-	//fmt.Println("network created")
-	//graph.PrintGraph()
-	pointerToGraph := &graph
-	//start := time.Now()
-	pointerToGraph.FindConnectedComponents(logFile, summaryFile)
-	pointerToGraph.PruneConnectedComps(logFile, summaryFile)
-	fmt.Fprintln(summaryFile, "\tAssembly summary")
-	fmt.Fprintln(summaryFile, "")
-	fmt.Fprintln(summaryFile, "\t\tminMatchLength:", minMatchLength)
-	fmt.Fprintln(summaryFile, "")
-	fmt.Fprintln(summaryFile, "\t\tkmer length:", k)
-	fmt.Fprintln(summaryFile, "")
-	fmt.Fprintln(summaryFile, "\t\tindexLength:", indexLength)
-	fmt.Fprintln(summaryFile, "")
-	fmt.Fprintln(summaryFile, "\t\terrorRate:", errorRate)
-	fmt.Fprintln(summaryFile, "")
-	Graph2Statistics(graph, summaryFile)
+		fmt.Fprintln(summaryFile, "\tCalling assembler...")
+		fmt.Fprintln(summaryFile, "")
+		minMatchLength := 300
+		indexLength := 15
+		k := 15
+		errorRate := 0.11
+		//contigs := GenomeAssembler4(reads, minMatchLength, indexLength, errorRate, k)
+		//fmt.Println(len(contigs))
+		//PrintStatistics(contigs)
+		//fmt.Println("Finally, we write contigs to file.")
+		//outFilename := "assembly_contigs.fasta"
+		//WriteContigsToFile(contigs, outFilename)
+		//var graph Graph
+		//start1 := time.Now()
+		numOfReads := 5000
+		fmt.Fprintln(summaryFile, "\t\tRunning assembly on", numOfReads, "reads.")
+		fmt.Fprintln(summaryFile, "")
+		var graph Graph2
+		graph = CreateReadNetwork3Index(reads[:numOfReads], minMatchLength, k, indexLength, errorRate, logFile, summaryFile)
+		//graph = GetTestGraph52()
+		//fmt.Println("network created")
+		//graph.PrintGraph()
+		pointerToGraph := &graph
+		//start := time.Now()
+		pointerToGraph.FindConnectedComponents(logFile, summaryFile)
+		pointerToGraph.PruneConnectedComps(logFile, summaryFile)
+		fmt.Fprintln(summaryFile, "\tAssembly summary")
+		fmt.Fprintln(summaryFile, "")
+		fmt.Fprintln(summaryFile, "\t\tminMatchLength:", minMatchLength)
+		fmt.Fprintln(summaryFile, "")
+		fmt.Fprintln(summaryFile, "\t\tkmer length:", k)
+		fmt.Fprintln(summaryFile, "")
+		fmt.Fprintln(summaryFile, "\t\tindexLength:", indexLength)
+		fmt.Fprintln(summaryFile, "")
+		fmt.Fprintln(summaryFile, "\t\terrorRate:", errorRate)
+		fmt.Fprintln(summaryFile, "")
+		Graph2Statistics(graph, summaryFile)
 	*/
 
 	//fmt.Println("read:", reads[0])
@@ -192,17 +192,16 @@ func main() {
 	//sharedKmers := CountSharedKmers(stringone, stringtwo, 3)
 	//fmt.Println("shared kmers:", sharedKmers)
 
-
-	testGraph := GetTestGraph52()
+	testGraph := GetTestGraph62()
 	pointerToGraph := &testGraph
 	pointerToGraph.FindConnectedComponents(logFile, summaryFile)
 	pointerToGraph.PruneConnectedComps(logFile, summaryFile)
 	testGraph.LNBPfinder(logFile)
 	Graph2Statistics(testGraph, summaryFile)
 	for i, conn := range testGraph.connectedComponents {
-		fmt.Print("cc ", i+1,":	[")
-		for _, node := range conn {
-			fmt.Print(" ",node.id," ")
+		fmt.Print("cc ", i+1, ":	[")
+		for _, node := range conn.nodes {
+			fmt.Print(" ", node.id, " ")
 		}
 		fmt.Println("]")
 	}
