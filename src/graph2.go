@@ -130,7 +130,7 @@ func (node *Node2) addOutNode(node2 Node2) {
 	node.outnodes = append(node.outnodes, node2)
 }
 
-func (graph *Graph2) dfs(node Node2, connectedComp connectedComponent, logFile *os.File) {
+func (graph *Graph2) dfs(node Node2, connectedComp *connectedComponent, logFile *os.File) {
 	fmt.Fprintln(logFile, "entering dfs")
 	fmt.Fprintln(logFile, "innodes:", len(node.innodes))
 	fmt.Fprintln(logFile, "outnodes:", len(node.outnodes))
@@ -150,7 +150,8 @@ func (graph *Graph2) dfs(node Node2, connectedComp connectedComponent, logFile *
 		//	fmt.Print(connectedComp[i].id, " ")
 		//}
 		//fmt.Println("}")
-		graph.addConnectedComp(connectedComp)
+		//graph.addConnectedComp(connectedComp)
+		return
 		//graph.FindLongestPath(connectedComp, logFile)
 	}
 	for _, outnode := range node.outnodes {
@@ -162,6 +163,7 @@ func (graph *Graph2) dfs(node Node2, connectedComp connectedComponent, logFile *
 
 			//fmt.Println("node that is about to be appended:", graph.Nodes[id].id)
 			connectedComp.nodes = append(connectedComp.nodes, graph.Nodes[outnode.id])
+			fmt.Fprintln(logFile, "node added")
 			//nodes := graph.Nodes
 			//delete(nodes, outnode.id)
 			//graph.Nodes = nodes
@@ -170,14 +172,15 @@ func (graph *Graph2) dfs(node Node2, connectedComp connectedComponent, logFile *
 			graph.dfs(graph.Nodes[outnode.id], connectedComp, logFile)
 		} else if !(isAConnectedComp2(graph, connectedComp)) {
 			fmt.Fprintln(logFile, "Found a connected Component")
-			graph.addConnectedComp(connectedComp)
+			//graph.addConnectedComp(connectedComp)
+			return
 			//graph.FindLongestPath(connectedComp, logFile)
 		}
 	}
 }
 
-func (node Node2) isInConnectedComp(connComp connectedComponent) bool {
-	for _, neigh := range connComp.nodes {
+func (node Node2) isInConnectedComp(connComp *connectedComponent) bool {
+	for _, neigh := range (*connComp).nodes {
 		if node.id == neigh.id {
 			return true
 		}
@@ -194,9 +197,9 @@ func (node Node2) isInConnectedCompPoint(connComp *[]Node2) bool {
 	return false
 }
 
-func isAConnectedComp2(graph *Graph2, connectedComp connectedComponent) bool {
+func isAConnectedComp2(graph *Graph2, connectedComp *connectedComponent) bool {
 	for _, comps := range graph.connectedComponents {
-		if comps.nodes[0].id == connectedComp.nodes[0].id {
+		if comps.nodes[0].id == (*connectedComp).nodes[0].id {
 			return true
 		}
 	}
@@ -232,7 +235,9 @@ func (graph *Graph2) FindConnectedComponents(logFile *os.File, summaryFile *os.F
 			connectedComp.nodes = append(connectedComp.nodes, graph.Nodes[i])
 
 			temp := connectedComp
-			graph.dfs(graph.Nodes[i], temp, logFile)
+			graph.dfs(graph.Nodes[i], &temp, logFile)
+			connectedComp = temp
+			graph.addConnectedComp(connectedComp)
 		}
 	}
 }
@@ -351,15 +356,11 @@ func Graph2Statistics(graph Graph2, summaryFile *os.File) {
 	//}
 }
 
-func (graph *Graph2) removeNodeNBP(nbp *[]Node2, index int) {
+func (graph *Graph2) removeLastNodeNBP(nbp *[]Node2, logFile *os.File) *[]Node2 {
 	//fmt.Println("length of connected components before removal:", len(graph.connectedComponents))
-	newSlice := make([]Node2, 0)
-	for i := range *nbp {
-		if i != index {
-			newSlice = append(newSlice, (*nbp)[i])
-		}
-	}
-	nbp = &newSlice
+	newSlice := (*nbp)[:len(*nbp)-1]
+	fmt.Fprintln(logFile, "****REMOVENODE METHOD**** length of newSlice:", len(newSlice))
+	return &newSlice
 	//fmt.Println("length of connected components after removal:", len(graph.connectedComponents))
 }
 
@@ -376,8 +377,9 @@ func (graph *Graph2) maxNBP(nbps [][]Node2) []Node2 {
 func (connectedComp *connectedComponent) FindLongestPath(graph *Graph2, logFile *os.File) {
 	longestPath := make([]Node2, 0)
 	for _, node := range connectedComp.nodes {
-		tempPath := make([]Node2, 0)
-		tempPath = append(tempPath, graph.Nodes[node.id])
+		var tempPath *[]Node2
+		tp := make([]Node2, 0)
+		tempPath = &tp
 		connectedComp.dfs1(node, &tempPath, logFile, graph)
 	}
 	longestPath = graph.maxNBP(connectedComp.nbps)
@@ -385,57 +387,56 @@ func (connectedComp *connectedComponent) FindLongestPath(graph *Graph2, logFile 
 	graph.addLNBP(longestPath)
 }
 
-func (connectedComp *connectedComponent) dfs1(node Node2, nbp *[]Node2, logFile *os.File, graph *Graph2) {
+func (connectedComp *connectedComponent) dfs1(node Node2, nbp **[]Node2, logFile *os.File, graph *Graph2) {
 	fmt.Fprintln(logFile, "entering dfs")
 	fmt.Fprintln(logFile, "innodes:", len(node.innodes))
 	fmt.Fprintln(logFile, "outnodes:", len(node.outnodes))
 	fmt.Fprintln(logFile, "node of dfs:", node.id)
-	//if node.visited {
-	//fmt.Println("visited")
-	//} else {
-	//fmt.Println("not visited")
-	//}
-	//fmt.Println("how many accumulatd components : ",len(connectedComp))
-	//fmt.Println("How many neighbors:", len(node.edges))
-	//fmt.Println("accumulated comps:", len(connectedComp))
-	if len(node.outnodes) == 0 {
-		fmt.Fprintln(logFile, "path found")
-		fmt.Fprintln(logFile, "done with", node.id)
-		// clone the nbp array  , save it to a global data structure
-		fmt.Fprintln(logFile, "length of paths before nbp is added", len(connectedComp.nbps))
-		//pathsNBPtemp := *pathsNBP
-		//pathsNBPtemp = append(pathsNBPtemp, *nbp)
-		//pathsNBP = &pathsNBPtemp
-		connectedComp.nbps = append(connectedComp.nbps, *nbp)
-		fmt.Fprintln(logFile, "length of paths afte nbp is added", len(connectedComp.nbps))
-		graph.removeNodeNBP(nbp, len(*nbp)-1)
-		return
-	}
+
+	// add this node to the path
+	nbpTempPoint := *nbp
+	nbpTemp := *nbpTempPoint
+	nbpTemp = append(nbpTemp, node)
+	nbpTempPoint = &nbpTemp
+	nbp = &nbpTempPoint
+
+	//checking each of the adjacent nodes
 	for _, outnode := range node.outnodes {
+		fmt.Fprint(logFile, "path at top of for: [ ")
+		for _, node := range **nbp {
+			fmt.Fprint(logFile, node.id, " ")
+		}
+		fmt.Fprintln(logFile, "]")
 		fmt.Fprintln(logFile, "edge found:", outnode.id)
-		inCC := graph.Nodes[outnode.id].isInConnectedCompPoint(nbp)
-		fmt.Fprintln(logFile, "is it in the cc?", graph.Nodes[outnode.id].isInConnectedCompPoint(nbp))
+		inCC := graph.Nodes[outnode.id].isInConnectedCompPoint(*nbp)
+		fmt.Fprintln(logFile, "is it in the cc?", graph.Nodes[outnode.id].isInConnectedCompPoint(*nbp))
 
-		if inCC {
-			fmt.Fprintln(logFile, "done with", node.id)
-			fmt.Fprintln(logFile, "length of paths before nbp is added", len(connectedComp.nbps))
-			//pathsNBPtemp := *pathsNBP
-			//pathsNBPtemp = append(pathsNBPtemp, *nbp)
-			//pathsNBP = &pathsNBPtemp
-			connectedComp.nbps = append(connectedComp.nbps, *nbp)
-			graph.removeNodeNBP(nbp, len(*nbp)-1)
-			return
-		} else {
-			//fmt.Println("node that is about to be appended:", graph.Nodes[id].id)
-			nbpTemp := *nbp
-			nbpTemp = append(nbpTemp, graph.Nodes[outnode.id])
-			nbp = &nbpTemp
-			fmt.Fprintln(logFile, "accumulated comps:", len(*nbp))
-
+		if !inCC {
 			connectedComp.dfs1(graph.Nodes[outnode.id], nbp, logFile, graph)
+			fmt.Fprint(logFile, "path at bottom of for: [ ")
+			for _, node := range **nbp {
+				fmt.Fprint(logFile, node.id, " ")
+			}
+			fmt.Fprintln(logFile, "]")
 		}
 	}
+
+	//done visiting all of them add current path to list of paths and delete nyself
 	fmt.Fprintln(logFile, "done with", node.id)
+	fmt.Fprint(logFile, "path found: [ ")
+	for _, node := range **nbp {
+		fmt.Fprint(logFile, node.id, " ")
+	}
+	fmt.Fprintln(logFile, "]")
+	//fmt.Fprintln(logFile, "length of nbp that's being added", len(*nbp))
+	connectedComp.nbps = append(connectedComp.nbps, **nbp)
+	*nbp = graph.removeLastNodeNBP(*nbp, logFile)
+	fmt.Fprint(logFile, "path after deletion: [ ")
+	for _, node := range **nbp {
+		fmt.Fprint(logFile, node.id, " ")
+	}
+	fmt.Fprintln(logFile, "]")
+	//fmt.Fprintln(logFile, "length of nbp after deletion", len(*nbp))
 }
 
 func (graph *Graph2) addLNBP(lnbp []Node2) {
