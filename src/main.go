@@ -8,12 +8,12 @@ import (
 )
 
 func main() {
-	summaryFileName := "summary.txt"
+	summaryFileName := "summary100.txt"
 	summaryFile, err1 := os.Create(summaryFileName)
 	if err1 != nil {
 		panic("Sorry, couldn't create file!")
 	}
-	logFileName := "log1.txt"
+	logFileName := "log100.txt"
 	logFile, err := os.Create(logFileName)
 	if err != nil {
 		panic("Sorry, couldn't create file!")
@@ -103,7 +103,6 @@ func main() {
 
 	// part 4: saving our assembler OR coder's revenge
 
-
 	filename := "data/BS_2GG.fasta.txt"
 	fmt.Fprintln(summaryFile, "\tLoading reads...")
 	fmt.Fprintln(summaryFile, "")
@@ -134,7 +133,7 @@ func main() {
 	//WriteContigsToFile(contigs, outFilename)
 	//var graph Graph
 	//start1 := time.Now()
-	numOfReads := 10000
+	numOfReads := 100
 	fmt.Fprintln(summaryFile, "\t\tRunning assembly on", numOfReads, "reads.")
 	fmt.Fprintln(summaryFile, "")
 	var graph Graph2
@@ -158,7 +157,6 @@ func main() {
 	fmt.Fprintln(summaryFile, "\t\terrorRate:", errorRate)
 	fmt.Fprintln(summaryFile, "")
 	Graph2Statistics(graph, summaryFile)
-
 
 	//fmt.Println("read:", reads[0])
 	//fmt.Println()
@@ -194,20 +192,21 @@ func main() {
 	//fmt.Println("shared kmers:", sharedKmers)
 
 	/*
-	testGraph := GetTestGraph72()
-	pointerToGraph := &testGraph
-	pointerToGraph.FindConnectedComponents(logFile, summaryFile)
-	pointerToGraph.PruneConnectedComps(logFile, summaryFile)
-	testGraph.LNBPfinder(logFile)
-	Graph2Statistics(testGraph, summaryFile)
-	for i, conn := range testGraph.connectedComponents {
-		fmt.Print("cc ", i+1, ":	[")
-		for _, node := range conn.nodes {
-			fmt.Print(" ", node.id, " ")
+		testGraph := GetTestGraph82()
+		pointerToGraph := &testGraph
+		pointerToGraph.FindConnectedComponents(logFile, summaryFile)
+		pointerToGraph.PruneConnectedComps(logFile, summaryFile)
+		testGraph.LNBPfinder(logFile)
+		Graph2Statistics(testGraph, summaryFile)
+		for i, conn := range testGraph.connectedComponents {
+			fmt.Print("cc ", i+1, ":	[")
+			for _, node := range conn.nodes {
+				fmt.Print(" ", node.id, " ")
+			}
+			fmt.Println("]")
 		}
-		fmt.Println("]")
-	}
 	*/
+
 }
 
 func GetTestGraph() Graph {
@@ -372,5 +371,13 @@ func GetTestGraph72() Graph2 {
 	testGraph.addEdge2(3, 5, "Over")
 	testGraph.addEdge2(5, 8, "Over")
 	testGraph.addEdge2(8, 7, "Over")
+	return testGraph
+}
+
+func GetTestGraph82() Graph2 {
+	testGraph := MakeGraph2()
+	testGraph.addNode2(0, "A")
+	testGraph.addNode2(1, "B")
+	testGraph.addNode2(2, "C")
 	return testGraph
 }

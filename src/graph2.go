@@ -316,7 +316,7 @@ func Graph2Statistics(graph Graph2, summaryFile *os.File) {
 		}
 		totalNodes = append(totalNodes, numNodes)
 	}
-	fmt.Fprintln(summaryFile, "\t\ttotal connected comps:", len(totalNodes))
+	fmt.Fprintln(summaryFile, "\t\ttotal connected comps:", len(graph.connectedComponents))
 	fmt.Fprintln(summaryFile, "")
 	tot := 0
 	for _, lens := range totalNodes {
@@ -333,6 +333,30 @@ func Graph2Statistics(graph Graph2, summaryFile *os.File) {
 			max = len(cc.nodes)
 		}
 	}
+	pathNodes := make([]int, 0)
+	for _, path := range graph.LNBPs {
+		numNodes := 0
+		for i := 0; i < len(path); i++ {
+			numNodes++
+		}
+		pathNodes = append(pathNodes, numNodes)
+	}
+	totpathNodes := 0
+	for _, lens := range totalNodes {
+		tot += lens
+	}
+	avgLenPath := totpathNodes / (len(pathNodes))
+	minPath := len(graph.LNBPs[0])
+	maxPath := len(graph.LNBPs[0])
+	for _, path := range graph.LNBPs {
+		length := len(path)
+		if length < minPath {
+			min = length
+		}
+		if length > maxPath {
+			maxPath = length
+		}
+	}
 	fmt.Fprintln(summaryFile, "\t\tmax cc size:", max)
 	fmt.Fprintln(summaryFile, "")
 	fmt.Fprintln(summaryFile, "\t\tmin cc size:", min)
@@ -342,6 +366,12 @@ func Graph2Statistics(graph Graph2, summaryFile *os.File) {
 	fmt.Fprintln(summaryFile, "\t\tnumber of edges:", len(graph.Edges))
 	fmt.Fprintln(summaryFile, "")
 	fmt.Fprintln(summaryFile, "\t\tnumber of lnbps:", len(graph.LNBPs))
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\taverage lnbp size:", avgLenPath)
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tmax lnbp size:", maxPath)
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tmin lnbp size:", minPath)
 	fmt.Fprintln(summaryFile, "")
 	for _, lnbp := range graph.LNBPs {
 		fmt.Fprint(summaryFile, "[ ")
