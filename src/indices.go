@@ -111,7 +111,7 @@ func BuildPrefixIndex3(nodes *map[int]Node2, prefixLength, k int, errorRate floa
 
 	index := make(map[string]([]int))
 
-	expectedShared := float64(ExpectedSharedkmers(prefixLength, errorRate, k))
+	//expectedShared := float64(ExpectedSharedkmers(prefixLength, errorRate, k))
 
 	//populate our index
 	for id := range *nodes {
@@ -124,7 +124,7 @@ func BuildPrefixIndex3(nodes *map[int]Node2, prefixLength, k int, errorRate floa
 
 		if len(index) > 0 {
 			for key := range index {
-				if float64(CountSharedKmers(key, prefix, k)) >= 0.9 * expectedShared {
+				if float64(CountSharedKmers(key, prefix, k)) >= 0.9 * float64(ExpectedSharedkmers(prefixLength, errorRate, k)) {
 					index[key] = append(index[key], id)
 					//node.setprefkey(key)
 					//(*nodes)[id] = node
@@ -151,7 +151,7 @@ func BuildPrefixIndex3(nodes *map[int]Node2, prefixLength, k int, errorRate floa
 func BuildSuffixIndex3(nodes *map[int]Node2, suffixLength, k int, errorRate float64, logFile *os.File) map[string]([]int) {
 	index := make(map[string]([]int))
 
-	expectedShared := float64(ExpectedSharedkmers(suffixLength, errorRate, k))
+	//expectedShared := float64(ExpectedSharedkmers(suffixLength, errorRate, k))
 
 	//populate our index
 	for id := range *nodes {
@@ -165,7 +165,7 @@ func BuildSuffixIndex3(nodes *map[int]Node2, suffixLength, k int, errorRate floa
 
 		if len(index) > 0 {
 			for key := range index {
-				if float64(CountSharedKmers(key, suffix, k)) >= 0.9 * expectedShared {
+				if float64(CountSharedKmers(key, suffix, k)) >= 0.9 * float64(ExpectedSharedkmers(suffixLength, errorRate, k)) {
 					index[key] = append(index[key], id)
 					//node.setsuffkey(key)
 					//(*nodes)[id] = node

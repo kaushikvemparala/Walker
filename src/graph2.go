@@ -92,24 +92,30 @@ func (node Node2) getsuffkey() string {
 	return node.suffkey
 }
 
-func (graph Graph2) getNonBranchingPaths() [][]Node2 {
+func (graph Graph2) getNonBranchingPaths(logFile *os.File) [][]Node2 {
 	paths := make([][]Node2, 0)
 	for _, node := range graph.Nodes {
 		//if !(node.isOnetoOne()) {
-		if len(node.outnodes) > 0 {
-			for _, outnode := range node.outnodes {
-				nonBranchingPath := make([]Node2, 0)
-				nonBranchingPath = append(nonBranchingPath, node)
-				nonBranchingPath = append(nonBranchingPath, outnode)
-				for outnode.isOnetoOne() {
-					fmt.Println(outnode.id)
-					outnode2 := outnode.outnodes[0]
-					nonBranchingPath = append(nonBranchingPath, outnode2)
-					outnode = outnode2
+			if len(node.outnodes) > 0 {
+				for _, outnode := range node.outnodes {
+					nonBranchingPath := make([]Node2, 0)
+					nonBranchingPath = append(nonBranchingPath, node)
+					fmt.Fprintln(logFile, "added ", node.id)
+					nonBranchingPath = append(nonBranchingPath, outnode)
+					fmt.Fprintln(logFile, "added ", outnode.id)
+					for (len(outnode.outnodes) > 0) {
+						fmt.Fprintln(logFile, "outnode has outedges")
+						fmt.Println(outnode.id)
+						outnode2 := outnode.outnodes[0]
+						nonBranchingPath = append(nonBranchingPath, outnode2)
+						outnode = outnode2
+					}
+					//for outnode.isOnetoOne() {
+					//	fmt.Fprintln(logFile, "is not 1 to 1")
+					//}
+					paths = append(paths, nonBranchingPath)
 				}
-				paths = append(paths, nonBranchingPath)
 			}
-		}
 		//}
 	}
 	return paths
@@ -322,7 +328,7 @@ func Graph2Statistics(graph Graph2, summaryFile *os.File) {
 	for _, lens := range totalNodes {
 		tot += lens
 	}
-	avgLen := tot / (len(totalNodes))
+	avgLen := float64(tot) / float64(len(totalNodes))
 	min := len(graph.connectedComponents[0].nodes)
 	max := len(graph.connectedComponents[0].nodes)
 	for _, cc := range graph.connectedComponents {
@@ -345,9 +351,14 @@ func Graph2Statistics(graph Graph2, summaryFile *os.File) {
 	for _, lens := range totalNodes {
 		tot += lens
 	}
-	avgLenPath := totpathNodes / (len(pathNodes))
-	minPath := len(graph.LNBPs[0])
-	maxPath := len(graph.LNBPs[0])
+	avgLenPath := 0
+	minPath := 0
+	maxPath := 0
+	if (len(pathNodes) != 0) && (len(graph.LNBPs) != 0) {
+		avgLenPath = totpathNodes / (len(pathNodes))
+		minPath = len(graph.LNBPs[0])
+		maxPath = len(graph.LNBPs[0])
+	}
 	for _, path := range graph.LNBPs {
 		length := len(path)
 		if length < minPath {
