@@ -8,12 +8,12 @@ import (
 )
 
 func main() {
-	summaryFileName := "summary10000NEW.txt"
+	summaryFileName := "summary1000TEST.txt"
 	summaryFile, err1 := os.Create(summaryFileName)
 	if err1 != nil {
 		panic("Sorry, couldn't create file!")
 	}
-	logFileName := "log10000NEW.txt"
+	logFileName := "log1000TEST.txt"
 	logFile, err := os.Create(logFileName)
 	if err != nil {
 		panic("Sorry, couldn't create file!")
@@ -122,7 +122,7 @@ func main() {
 
 	fmt.Fprintln(summaryFile, "\tCalling assembler...")
 	fmt.Fprintln(summaryFile, "")
-	minMatchLength := 300
+	minMatchLength := 800
 	indexLength := 15
 	k := 15
 	errorRate := 0.11
@@ -134,7 +134,7 @@ func main() {
 	//WriteContigsToFile(contigs, outFilename)
 	//var graph Graph
 	//start1 := time.Now()
-	numOfReads := 10000
+	numOfReads := 1000
 	fmt.Fprintln(summaryFile, "\t\tRunning assembly on", numOfReads, "reads.")
 	fmt.Fprintln(summaryFile, "")
 	var graph Graph2

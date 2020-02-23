@@ -2203,7 +2203,11 @@ func CreateReadNetwork3Index(reads []string, minMatchLength, k, indexLength int,
 		suffix := node.read[n-minMatchLength:]
 		for key := range prefixIndex {
 			//if node.read[:indexLength] == key[minMatchLength-indexLength:] {
-			if float64(CountSharedKmers(key, suffix, k)) >= 0.9*float64(ExpectedSharedkmers(minMatchLength, errorRate, k)) {
+			edgeCountShared := float64(CountSharedKmers(key, suffix, k))
+			edgeExpectedShared := float64(ExpectedSharedkmers(minMatchLength, errorRate, k))
+			fmt.Println("edgeCountShared:", edgeCountShared)
+			fmt.Println("edgeExpectedShared:", edgeExpectedShared)
+			if edgeCountShared >= 0.9*edgeExpectedShared {
 				for _, id2 := range prefixIndex[key] {
 					if id2 != node.getID2() {
 						//build an edge from node to the id2

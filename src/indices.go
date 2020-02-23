@@ -124,7 +124,13 @@ func BuildPrefixIndex3(nodes *map[int]Node2, prefixLength, k int, errorRate floa
 
 		if len(index) > 0 {
 			for key := range index {
-				if float64(CountSharedKmers(key, prefix, k)) >= 0.9 * float64(ExpectedSharedkmers(prefixLength, errorRate, k)) {
+				//fmt.Println("length of key:", len(key))
+				//fmt.Println("length of prefix:", len(prefix))
+				countShared := float64(CountSharedKmers(key, prefix, 15))
+				expectedShared := float64(ExpectedSharedkmers(prefixLength, errorRate, k))
+				//fmt.Println("countShared:", countShared)
+				//fmt.Println("expectedShared:", expectedShared)
+				if countShared >= 0.5 * expectedShared {
 					index[key] = append(index[key], id)
 					//node.setprefkey(key)
 					//(*nodes)[id] = node
@@ -165,7 +171,7 @@ func BuildSuffixIndex3(nodes *map[int]Node2, suffixLength, k int, errorRate floa
 
 		if len(index) > 0 {
 			for key := range index {
-				if float64(CountSharedKmers(key, suffix, k)) >= 0.9 * float64(ExpectedSharedkmers(suffixLength, errorRate, k)) {
+				if float64(CountSharedKmers(key, suffix, k)) >= 0.5 * float64(ExpectedSharedkmers(suffixLength, errorRate, k)) {
 					index[key] = append(index[key], id)
 					//node.setsuffkey(key)
 					//(*nodes)[id] = node
