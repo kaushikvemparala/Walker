@@ -2270,3 +2270,100 @@ func CreateReadNetwork3Index(reads []string, minMatchLength, k, indexLength int,
 	//fmt.Println(len(network.Edges))
 	return network
 }
+
+func CreateReadNetwork5Index(reads []string, minMatchLength, k, indexLength int, errorRate float64, logFile *os.File, summaryFile *os.File) Graph2 {
+
+	nodeTimes := make([]float64, 0)
+
+	network := MakeGraph2()
+	pointerToNetwork := &network
+
+	for i, read := range reads {
+		fmt.Fprintln(logFile, "Adding read number", i+1)
+		pointerToNetwork.addNode2(i, read)
+	}
+
+
+	fmt.Fprintln(summaryFile, "\t\tBuilding prefixIndex")
+	fmt.Fprintln(summaryFile, "")
+	prefixIndex := BuildPrefixIndex2(reads, indexLength, logFile)
+	fmt.Fprintln(summaryFile, "\t\tprefixIndex built!")
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tBuilding suffixIndex")
+	fmt.Fprintln(summaryFile, "")
+	suffixIndex := BuildSuffixIndex2(reads, indexLength, logFile)
+	fmt.Fprintln(summaryFile, "\t\tsuffixIndex built!")
+	fmt.Fprintln(summaryFile, "")
+
+	fmt.Fprintln(summaryFile, "\t\tlength of prefixIndex:", len(prefixIndex))
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\tlength of suffixIndex:", len(suffixIndex))
+	fmt.Fprintln(summaryFile, "")
+
+	//expectedShared := float64(ExpectedSharedkmers(minMatchLength, errorRate, k))
+
+	fmt.Fprintln(summaryFile, "\t\tBuilding edges")
+	fmt.Fprintln(summaryFile, "")
+
+	for i := 0; i < len(network.Nodes); i++ {
+		node := network.Nodes[i]
+		start := time.Now()
+		fmt.Fprintln(logFile, "entering the", node.getID2()+1, "th loop out of", len(network.Nodes))
+		n := len(node.read)
+		prefix := node.read[:minMatchLength]
+		suffix := node.read[n-minMatchLength:]
+		preMatchList, exists := prefixIndex[node.read[n-indexLength:]]
+		if exists {
+			//fmt.Println("there is a prefix matchlist")
+			for matchID := range preMatchList {
+				countShared := float64(CountSharedKmers(network.Nodes[matchID].read[:minMatchLength], suffix, k))
+				expectedShared := float64(ExpectedSharedkmers(minMatchLength, errorRate, k))
+				fmt.Println("expectedShared:", expectedShared)
+				fmt.Println("countShared:", countShared)
+				if countShared >= 0.7 * expectedShared {
+					if matchID != node.getID2() {
+						//build an edge from node to the id2
+						network.addEdge2(matchID, node.getID2(), suffix)
+					}
+				}
+			}
+		}
+
+		sufMatchList, sufExists := suffixIndex[node.read[:indexLength]]
+		if sufExists {
+			//fmt.Println("there is a suffix matchlist")
+			for matchID := range sufMatchList {
+				countShared := float64(CountSharedKmers(network.Nodes[matchID].read[len(network.Nodes[matchID].read) - minMatchLength:], prefix, k))
+				expectedShared := float64(ExpectedSharedkmers(minMatchLength, errorRate, k))
+				fmt.Println("expectedShared:", expectedShared)
+				fmt.Println("countShared:", countShared)
+				if countShared >= 0.7 * expectedShared {
+					if matchID != node.getID2() {
+						network.addEdge2(matchID, node.getID2(), prefix)
+					}
+				}
+			}
+		}
+
+		//fmt.Println("outnodes:", len(node.outnodes))
+		//fmt.Println("innodes:", len(node.innodes))
+
+		elapsed := time.Since(start).Seconds()
+		nodeTimes = append(nodeTimes, elapsed)
+		network.Nodes[i] = node
+
+	}
+	totTime := 0.0
+	for _, times := range nodeTimes {
+		totTime += times
+	}
+	fmt.Fprintln(summaryFile, "\t\ttotal edges:", len(network.Edges))
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\ttotal edge building time:", totTime, "seconds")
+	fmt.Fprintln(summaryFile, "")
+	fmt.Fprintln(summaryFile, "\t\taverage edge building time time per node:", totTime/(float64(len(nodeTimes))), "seconds")
+	fmt.Fprintln(summaryFile, "")
+	//network.PrintGraph2()
+	//fmt.Println(len(network.Edges))
+	return network
+}

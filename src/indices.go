@@ -58,7 +58,7 @@ func BuildSuffixIndex(reads []string, suffixLength int) map[string]([]int) {
 	return index
 }
 
-func BuildPrefixIndex2(reads []string, prefixLength int) map[string]([]int) {
+func BuildPrefixIndex2(reads []string, prefixLength int, logFile *os.File) map[string]([]int) {
 	index := make(map[string]([]int))
 
 	//populate our index
@@ -78,11 +78,13 @@ func BuildPrefixIndex2(reads []string, prefixLength int) map[string]([]int) {
 		if i%100000 == 0 {
 			fmt.Println("Update: We have indexed", i, "prefixes.")
 		}
+		fmt.Fprintln(logFile, len(index))
 	}
+	fmt.Fprintln(logFile, "length of prefixIndex index:", len(index))
 	return index
 }
 
-func BuildSuffixIndex2(reads []string, suffixLength int) map[string]([]int) {
+func BuildSuffixIndex2(reads []string, suffixLength int, logFile *os.File) map[string]([]int) {
 	index := make(map[string]([]int))
 
 	//populate our index
@@ -103,7 +105,9 @@ func BuildSuffixIndex2(reads []string, suffixLength int) map[string]([]int) {
 		if i%100000 == 0 {
 			fmt.Println("Update: We have indexed", i, "suffixes.")
 		}
+		fmt.Fprintln(logFile, len(index))
 	}
+	fmt.Fprintln(logFile, "length of suffixIndex index:", len(index))
 	return index
 }
 

@@ -122,10 +122,10 @@ func main() {
 
 	fmt.Fprintln(summaryFile, "\tCalling assembler...")
 	fmt.Fprintln(summaryFile, "")
-	minMatchLength := 800
+	minMatchLength := 300
 	indexLength := 15
-	k := 15
-	errorRate := 0.11
+	k := 7
+	errorRate := 0.21
 	//contigs := GenomeAssembler4(reads, minMatchLength, indexLength, errorRate, k)
 	//fmt.Println(len(contigs))
 	//PrintStatistics(contigs)
@@ -134,11 +134,11 @@ func main() {
 	//WriteContigsToFile(contigs, outFilename)
 	//var graph Graph
 	//start1 := time.Now()
-	numOfReads := 1000
+	numOfReads := len(reads)
 	fmt.Fprintln(summaryFile, "\t\tRunning assembly on", numOfReads, "reads.")
 	fmt.Fprintln(summaryFile, "")
 	var graph Graph2
-	graph = CreateReadNetwork3Index(reads[:numOfReads], minMatchLength, k, indexLength, errorRate, logFile, summaryFile)
+	graph = CreateReadNetwork5Index(reads[:numOfReads], minMatchLength, k, indexLength, errorRate, logFile, summaryFile) //CreateReadNetwork3Index(reads[:numOfReads], minMatchLength, k, indexLength, errorRate, logFile, summaryFile)
 	//graph = GetTestGraph52()
 	//fmt.Println("network created")
 	//graph.PrintGraph()
@@ -158,6 +158,7 @@ func main() {
 	fmt.Fprintln(summaryFile, "\t\terrorRate:", errorRate)
 	fmt.Fprintln(summaryFile, "")
 	Graph2Statistics(graph, summaryFile)
+	fmt.Fprintln(logFile, "number of edges built: ", len(graph.Edges))
 
 
 	//fmt.Println("read:", reads[0])
